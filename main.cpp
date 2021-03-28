@@ -285,6 +285,69 @@ void put_different_price_sell_orders_to_queue__sorted_as_expected()
   TEST_CHECK(0 == sell_queue.get_size());
 }
 
+void put_one_order__no_trade()
+{
+  {
+    ome::order_book book;
+    auto traded = book.put_order(ome::buy_order(1, 1, 1, system_clock::from_time_t(1)));
+    TEST_CHECK(0 == traded.first.size());
+    TEST_CHECK(false == traded.second);
+  }
+  {
+    ome::order_book book;
+    auto traded = book.put_order(ome::sell_order(1, 1, 1, system_clock::from_time_t(1)));
+    TEST_CHECK(0 == traded.first.size());
+    TEST_CHECK(false == traded.second);
+  }
+}
+
+void put_few_buy_orders__no_trade_expected_prices_returned()
+{
+  ome::order_book book;
+
+  book.put_order(ome::buy_order(1, 1, 1, system_clock::from_time_t(1)));
+  book.put_order(ome::buy_order(2, 1, 1, system_clock::from_time_t(1)));
+
+  book.put_order(ome::buy_order(3, 2, 1, system_clock::from_time_t(1)));
+  book.put_order(ome::buy_order(4, 2, 1, system_clock::from_time_t(2)));
+
+  book.put_order(ome::buy_order(5, 3, 1, system_clock::from_time_t(1)));
+  book.put_order(ome::buy_order(6, 4, 1, system_clock::from_time_t(2)));
+
+  auto bp = book.get_buy_prices();
+  TEST_ASSERT(4 == bp.size());
+  TEST_CHECK(1 == bp.count(1));
+  TEST_CHECK(1 == bp.count(2));
+  TEST_CHECK(1 == bp.count(3));
+  TEST_CHECK(1 == bp.count(4));
+
+  auto sp = book.get_sell_prices();
+  TEST_ASSERT(0 == sp.size());
+}
+
+void put_few_sell_orders__no_trade_expected_prices_returned()
+{
+  ome::order_book book;
+
+  book.put_order(ome::sell_order(1, 1, 1, system_clock::from_time_t(1)));
+  book.put_order(ome::sell_order(2, 1, 1, system_clock::from_time_t(1)));
+
+  book.put_order(ome::sell_order(3, 2, 1, system_clock::from_time_t(1)));
+  book.put_order(ome::sell_order(4, 2, 1, system_clock::from_time_t(2)));
+
+  book.put_order(ome::sell_order(5, 3, 1, system_clock::from_time_t(1)));
+  book.put_order(ome::sell_order(6, 4, 1, system_clock::from_time_t(2)));
+
+  auto sp = book.get_sell_prices();
+  TEST_ASSERT(4 == sp.size());
+  TEST_CHECK(1 == sp.count(1));
+  TEST_CHECK(1 == sp.count(2));
+  TEST_CHECK(1 == sp.count(3));
+  TEST_CHECK(1 == sp.count(4));
+
+  auto bp = book.get_buy_prices();
+  TEST_ASSERT(0 == bp.size());
+}
 TEST_LIST = {
      { "compare_sell_orders__compared_as_expected", compare_sell_orders__compared_as_expected}
    , { "compare_buy_orders__compared_as_expected", compare_buy_orders__compared_as_expected }
@@ -296,6 +359,10 @@ TEST_LIST = {
    , { "put_same_sell_orders_to_queue__sorted_as_expected", put_same_sell_orders_to_queue__sorted_as_expected}
    , { "put_different_time_sell_orders_to_queue__sorted_as_expected", put_different_time_sell_orders_to_queue__sorted_as_expected}
    , { "put_different_price_sell_orders_to_queue__sorted_as_expected", put_different_price_sell_orders_to_queue__sorted_as_expected}
+
+  ,  {"put_one_order__no_trade", put_one_order__no_trade}
+  ,  {"put_few_sell_orders__no_trade_expected_prices_returned", put_few_sell_orders__no_trade_expected_prices_returned}
+  ,  {"put_few_sell_orders__no_trade_expected_prices_returned", put_few_buy_orders__no_trade_expected_prices_returned}
 
    , { NULL, NULL }
 };
