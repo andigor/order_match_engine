@@ -43,15 +43,15 @@ namespace ome {
     }
     bool operator<(const order& other) const
     {
-      if (get_price() > other.get_price()) {
+      if (get_price() < other.get_price()) {
         return true;
       }
-      else if (get_price() < other.get_price()) {
+      else if (get_price() > other.get_price()) {
         return false;
       }
       else {
         // if prices are the same then compare dates
-        if (get_time() > other.get_time()) {
+        if (get_time() < other.get_time()) {
           return true;
         }
         else {
@@ -63,6 +63,7 @@ namespace ome {
 
   class buy_order : public order
   {
+  public:
     template <class ... Args>
     buy_order(Args&&... args) : order(std::forward<Args>(args)...)
     {
@@ -70,15 +71,15 @@ namespace ome {
     }
     bool operator<(const order& other) const
     {
-      if (get_price() < other.get_price()) {
+      if (get_price() > other.get_price()) {
         return true;
       }
-      else if (get_price() > other.get_price()) {
+      else if (get_price() < other.get_price()) {
         return false;
       }
       else {
         // if prices are the same then compare dates
-        if (get_time() > other.get_time()) {
+        if (get_time() < other.get_time()) {
           return true;
         }
         else {

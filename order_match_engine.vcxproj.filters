@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="order_match_engine.cpp">
+    <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="order.cpp">
@@ -30,6 +30,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="order_book.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="acutest\include\acutest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

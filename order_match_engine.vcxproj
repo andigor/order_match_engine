@@ -149,9 +149,10 @@
   <ItemGroup>
     <ClCompile Include="order_book.cpp" />
     <ClCompile Include="order.cpp" />
-    <ClCompile Include="order_match_engine.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="acutest\include\acutest.h" />
     <ClInclude Include="order_book.h" />
     <ClInclude Include="order.h" />
   </ItemGroup>
