@@ -32,20 +32,47 @@ namespace ome {
 // : public std::map<uint32_t, std::map<order_time, order>, Cmp>
 //};
 
-template<class Cmp>
+template <class Order>
 class orders_queue
 {
 public:
-  void insert(const order& o)
+  void insert(const Order& o)
   {
     m_orders.insert(o);
   }
-  void remove(const order& o)
+  void pop_order()
   {
+    assert(!m_orders.empty());
+    auto iter = begin();
+    m_orders.erase(iter);
+  }
+  Order get_current() const
+  {
+    assert(!m_orders.empty());
 
+    auto iter = begin();
+    return *iter;
+  }
+
+
+  //void remove(const order& o)
+  //{
+
+  //}
+  auto begin() const
+  {
+    return m_orders.begin();
+  }
+  auto end() const
+  {
+    return m_orders.begin();
+  }
+  size_t get_size() const
+  {
+    return m_orders.size();
   }
 private:
-  std::multiset<order> m_orders;
+  std::multiset<Order> m_orders;
 };
 class order_book
 {
