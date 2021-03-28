@@ -13,7 +13,7 @@ std::pair<std::vector<buy_order>, bool> order_book::put_order(const sell_order& 
     }
 
     auto& cur_buy = m_buy_orders.get_current();
-    if (cur_sell.get_price() >= cur_buy.get_price()) {
+    if (cur_sell.get_price() <= cur_buy.get_price()) {
       if (cur_sell.get_quantity() > cur_buy.get_quantity()) {
         matched.push_back(cur_buy);
         cur_sell.reduce_quantity(cur_buy.get_quantity());
@@ -49,7 +49,7 @@ std::pair<std::vector<sell_order>, bool> order_book::put_order(const buy_order& 
       return std::make_pair(matched, false);
     }
     auto& cur_sell = m_sell_orders.get_current();
-    if (cur_sell.get_price() >= cur_buy.get_price()) {
+    if (cur_sell.get_price() <= cur_buy.get_price()) {
       // can trade
       if (cur_sell.get_quantity() > cur_buy.get_quantity()) {
         cur_sell.reduce_quantity(cur_buy.get_quantity());
@@ -67,7 +67,7 @@ std::pair<std::vector<sell_order>, bool> order_book::put_order(const buy_order& 
       }
     }
     else {
-      m_sell_orders.insert(cur_sell);
+      m_buy_orders.insert(cur_buy);
       return std::make_pair(matched, false);
     }
   }
@@ -75,9 +75,10 @@ std::pair<std::vector<sell_order>, bool> order_book::put_order(const buy_order& 
   return {};
 }
 
-void order_book::cancel_order(int id)
+void order_book::cancel_order(size_t id)
 {
-
+  m_buy_orders.remove(id);
+  m_sell_orders.remove(id);
 }
 
 std::pair<std::vector<sell_order>, std::vector<buy_order>> order_book::get_orders_by_price() const

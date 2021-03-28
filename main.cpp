@@ -385,6 +385,105 @@ void put_two_complete_match_orders_start_from_sell__trade_executed()
   }
 }
 
+void put_few_sell_orders_few_buy__expected_executed()
+{
+  ome::order_book book;
+
+  book.put_order(ome::sell_order(1, 10, 5, system_clock::from_time_t(1)));
+  book.put_order(ome::sell_order(2, 15, 6, system_clock::from_time_t(1)));
+  book.put_order(ome::sell_order(3, 20, 7, system_clock::from_time_t(1)));
+
+  TEST_CHECK(0 == book.get_buy_size());
+  TEST_CHECK(3 == book.get_sell_size());
+  {
+    // there is no order to sell for 5 or lower expected no match
+    auto result = book.put_order(ome::buy_order(4, 5, 100, system_clock::from_time_t(1)));
+    TEST_CHECK(true == result.first.empty());
+    TEST_CHECK(false == result.second);
+
+    TEST_CHECK(1 == book.get_buy_size());
+    TEST_CHECK(3 == book.get_sell_size());
+  }
+  {
+    // put order which will be matched right away
+    auto result = book.put_order(ome::buy_order(5, 11, 3, system_clock::from_time_t(1)));
+    TEST_CHECK(0 == result.first.size());
+    TEST_CHECK(true == result.second);
+
+    TEST_CHECK(1 == book.get_buy_size());
+    TEST_CHECK(3 == book.get_sell_size());
+  }
+  {
+    // put order which will match order in the queue
+    auto result = book.put_order(ome::buy_order(6, 11, 3, system_clock::from_time_t(1)));
+    TEST_ASSERT(1 == result.first.size());
+    TEST_CHECK(1 == result.first[0].get_id());
+    TEST_CHECK(false == result.second);
+  }
+  {
+    auto result = book.put_order(ome::sell_order(7, 4, 101, system_clock::from_time_t(1)));
+    TEST_ASSERT(2 == result.first.size());
+    TEST_CHECK(6 == result.first[0].get_id());
+    TEST_CHECK(4 == result.first[1].get_id());
+    TEST_CHECK(true == result.second);
+  }
+  {
+    auto result = book.put_order(ome::buy_order(8, 25, 10, system_clock::from_time_t(1)));
+    TEST_ASSERT(1 == result.first.size());
+    TEST_CHECK(2 == result.first[0].get_id());
+    TEST_CHECK(true == result.second);
+  }
+  {
+    auto result = book.put_order(ome::buy_order(9, 25, 3, system_clock::from_time_t(1)));
+    TEST_ASSERT(1 == result.first.size());
+    TEST_CHECK(3 == result.first[0].get_id());
+    TEST_CHECK(true == result.second);
+
+    TEST_CHECK(0 == book.get_buy_size());
+    TEST_CHECK(0 == book.get_sell_size());
+  }
+}
+
+
+void put_few_sell_buy_orders_cancel__expected_cancelled()
+{
+  ome::order_book book;
+
+  book.put_order(ome::sell_order(1, 10, 5, system_clock::from_time_t(1)));
+  book.put_order(ome::sell_order(2, 15, 6, system_clock::from_time_t(1)));
+  book.put_order(ome::sell_order(3, 20, 7, system_clock::from_time_t(1)));
+
+  book.put_order(ome::buy_order(4, 1, 5, system_clock::from_time_t(1)));
+  book.put_order(ome::buy_order(5, 2, 6, system_clock::from_time_t(1)));
+  book.put_order(ome::buy_order(6, 3, 7, system_clock::from_time_t(1)));
+ 
+  TEST_CHECK(3 == book.get_buy_size());
+  TEST_CHECK(3 == book.get_sell_size());
+
+  book.cancel_order(1);
+  TEST_CHECK(3 == book.get_buy_size());
+  TEST_CHECK(2 == book.get_sell_size());
+
+  book.cancel_order(4);
+  TEST_CHECK(2 == book.get_buy_size());
+  TEST_CHECK(2 == book.get_sell_size());
+
+  book.cancel_order(2);
+  TEST_CHECK(2 == book.get_buy_size());
+  TEST_CHECK(1 == book.get_sell_size());
+
+  book.cancel_order(5);
+  TEST_CHECK(1 == book.get_buy_size());
+  TEST_CHECK(1 == book.get_sell_size());
+
+  book.cancel_order(3);
+  TEST_CHECK(1 == book.get_buy_size());
+  TEST_CHECK(0 == book.get_sell_size());
+
+  book.cancel_order(6);
+  TEST_CHECK(0 == book.get_buy_size());
+  TEST_CHECK(0 == book.get_sell_size());
+}
 
 TEST_LIST = {
      { "compare_sell_orders__compared_as_expected", compare_sell_orders__compared_as_expected}
@@ -404,6 +503,10 @@ TEST_LIST = {
 
   ,  {"put_two_complete_match_orders_start_from_sell__trade_executed", put_two_complete_match_orders_start_from_sell__trade_executed}
   ,  {"put_two_complete_match_orders_start_from_buy__trade_executed", put_two_complete_match_orders_start_from_buy__trade_executed}
+
+  ,  {"put_few_sell_orders_few_buy__expected_executed", put_few_sell_orders_few_buy__expected_executed}
+
+  ,  {"put_few_sell_buy_orders_cancel__expected_cancelled", put_few_sell_buy_orders_cancel__expected_cancelled}
 
    , { NULL, NULL }
 };
