@@ -23,6 +23,10 @@ namespace ome {
 
     size_t get_id() const { return m_id; }
     uint32_t get_price() const { return m_price; }
+    void reduce_quantity(uint32_t q)
+    {
+      m_quantity -= q;
+    }
     size_t get_quantity() const { return m_quantity; }
     order_time get_time() const { return m_time; }
 

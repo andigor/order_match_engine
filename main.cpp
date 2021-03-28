@@ -348,6 +348,44 @@ void put_few_sell_orders__no_trade_expected_prices_returned()
   auto bp = book.get_buy_prices();
   TEST_ASSERT(0 == bp.size());
 }
+
+void put_two_complete_match_orders_start_from_buy__trade_executed()
+{
+  ome::order_book book;
+  {
+    auto result = book.put_order(ome::buy_order(1, 10, 1, system_clock::from_time_t(1)));
+    TEST_CHECK(true == result.first.empty());
+    TEST_CHECK(false == result.second);
+  }
+  {
+    auto result = book.put_order(ome::sell_order(2, 10, 1, system_clock::from_time_t(2)));
+    TEST_ASSERT(1 == result.first.size());
+    TEST_CHECK(1 == result.first[0].get_id());
+    TEST_CHECK(true == result.second);
+    TEST_CHECK(0 == book.get_buy_size());
+    TEST_CHECK(0 == book.get_sell_size());
+  }
+}
+
+void put_two_complete_match_orders_start_from_sell__trade_executed()
+{
+  ome::order_book book;
+  {
+    auto result = book.put_order(ome::sell_order(1, 10, 1, system_clock::from_time_t(1)));
+    TEST_CHECK(true == result.first.empty());
+    TEST_CHECK(false == result.second);
+  }
+  {
+    auto result = book.put_order(ome::buy_order(2, 10, 1, system_clock::from_time_t(2)));
+    TEST_ASSERT(1 == result.first.size());
+    TEST_CHECK(1 == result.first[0].get_id());
+    TEST_CHECK(true == result.second);
+    TEST_CHECK(0 == book.get_buy_size());
+    TEST_CHECK(0 == book.get_sell_size());
+  }
+}
+
+
 TEST_LIST = {
      { "compare_sell_orders__compared_as_expected", compare_sell_orders__compared_as_expected}
    , { "compare_buy_orders__compared_as_expected", compare_buy_orders__compared_as_expected }
@@ -363,6 +401,9 @@ TEST_LIST = {
   ,  {"put_one_order__no_trade", put_one_order__no_trade}
   ,  {"put_few_sell_orders__no_trade_expected_prices_returned", put_few_sell_orders__no_trade_expected_prices_returned}
   ,  {"put_few_sell_orders__no_trade_expected_prices_returned", put_few_buy_orders__no_trade_expected_prices_returned}
+
+  ,  {"put_two_complete_match_orders_start_from_sell__trade_executed", put_two_complete_match_orders_start_from_sell__trade_executed}
+  ,  {"put_two_complete_match_orders_start_from_buy__trade_executed", put_two_complete_match_orders_start_from_buy__trade_executed}
 
    , { NULL, NULL }
 };

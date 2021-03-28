@@ -15,7 +15,7 @@ class orders_queue
 public:
   void insert(const Order& o)
   {
-    m_orders.insert(o);
+    m_orders.insert(std::make_pair(o, o));
   }
   void pop_order()
   {
@@ -23,12 +23,20 @@ public:
     auto iter = begin();
     m_orders.erase(iter);
   }
-  Order get_current() const
+
+  const Order& get_current() const
   {
     assert(!m_orders.empty());
+    typename std::multiset<Order>::iterator iter = m_orders.begin();
+    return iter->second;
+  }
 
-    auto iter = begin();
-    return *iter;
+  Order& get_current()
+  {
+    assert(!m_orders.empty());
+    auto iter = m_orders.begin();
+
+    return iter->second;
   }
 
 
@@ -42,14 +50,26 @@ public:
   }
   auto end() const
   {
+    return m_orders.end();
+  }
+  auto begin()
+  {
     return m_orders.begin();
+  }
+  auto end()
+  {
+    return m_orders.end();
   }
   size_t get_size() const
   {
     return m_orders.size();
   }
+  bool is_empty() const
+  {
+    return m_orders.empty();
+  }
 private:
-  std::multiset<Order> m_orders;
+  std::multimap<Order, Order> m_orders;
 };
 class order_book
 {
@@ -63,10 +83,17 @@ public:
 
   std::set<uint32_t> get_buy_prices() const;
   std::set<uint32_t> get_sell_prices() const;
-
+  size_t get_buy_size() const
+  {
+    return m_buy_orders.get_size();
+  }
+  size_t get_sell_size() const
+  {
+    return m_sell_orders.get_size();
+  }
 private:
-  std::set<buy_order> m_buy_orders;
-  std::set<sell_order> m_sell_orders;
+  orders_queue<buy_order> m_buy_orders;
+  orders_queue<sell_order> m_sell_orders;
 
 };
 
